@@ -21,6 +21,8 @@ echo
 # Check each tool
 check_version clang
 check_version g++
+check_version gcc
+check_version make
 check_version python3
 check_version dotnet
 check_version java
