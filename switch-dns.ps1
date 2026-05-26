@@ -22,14 +22,22 @@ if (-not $principal.IsInRole($adminRole)) {
 
 # ---------- CONFIG ----------
 
-# Change if your adapter has a different name
+# Change adapter name if needed
 $interface = "Wi-Fi"
 # $interface = "Ethernet"
 
-# Custom DNS servers
-$customDNS = @(
+# ---------- CUSTOM DNS ----------
+
+# IPv4 DNS
+$customDNSv4 = @(
     "194.242.2.2",   # Mullvad
-    "1.0.0.1"        # Cloudflare secondary
+    "1.0.0.1"        # Cloudflare
+)
+
+# IPv6 DNS
+$customDNSv6 = @(
+    "2a07:e340::2",      # Mullvad IPv6
+    "2606:4700:4700::1001" # Cloudflare IPv6
 )
 
 # ---------- FUNCTIONS ----------
@@ -37,19 +45,43 @@ $customDNS = @(
 function Show-CurrentDNS {
 
     Write-Host ""
-    Write-Host "Current DNS:" -ForegroundColor Cyan
+    Write-Host "Current DNS Configuration" `
+        -ForegroundColor Cyan
 
-    $dns = Get-DnsClientServerAddress `
+    # IPv4
+    Write-Host ""
+    Write-Host "IPv4 DNS:" `
+        -ForegroundColor Yellow
+
+    $dns4 = Get-DnsClientServerAddress `
         -InterfaceAlias $interface `
         -AddressFamily IPv4
 
-    if ($dns.ServerAddresses) {
-        $dns.ServerAddresses | ForEach-Object {
+    if ($dns4.ServerAddresses) {
+        $dns4.ServerAddresses | ForEach-Object {
             Write-Host " - $_"
         }
     }
     else {
         Write-Host " - Automatic (DHCP)"
+    }
+
+    # IPv6
+    Write-Host ""
+    Write-Host "IPv6 DNS:" `
+        -ForegroundColor Yellow
+
+    $dns6 = Get-DnsClientServerAddress `
+        -InterfaceAlias $interface `
+        -AddressFamily IPv6
+
+    if ($dns6.ServerAddresses) {
+        $dns6.ServerAddresses | ForEach-Object {
+            Write-Host " - $_"
+        }
+    }
+    else {
+        Write-Host " - Automatic"
     }
 
     Write-Host ""
@@ -61,6 +93,7 @@ function Set-AutomaticDNS {
     Write-Host "Switching to Automatic DNS..." `
         -ForegroundColor Yellow
 
+    # Reset IPv4 + IPv6
     Set-DnsClientServerAddress `
         -InterfaceAlias $interface `
         -ResetServerAddresses
@@ -76,9 +109,10 @@ function Set-CustomDNS {
     Write-Host "Switching to Custom DNS..." `
         -ForegroundColor Green
 
+    # Apply IPv4 + IPv6 DNS together
     Set-DnsClientServerAddress `
         -InterfaceAlias $interface `
-        -ServerAddresses $customDNS
+        -ServerAddresses ($customDNSv4 + $customDNSv6)
 
     ipconfig /flushdns | Out-Null
 
