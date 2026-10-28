@@ -30,13 +30,13 @@ $interface = "Wi-Fi"
 
 # IPv4 DNS
 $customDNSv4 = @(
-    "194.242.2.2",   # Mullvad
+    "9.9.9.9",   # Quad9
     "1.0.0.1"        # Cloudflare
 )
 
 # IPv6 DNS
 $customDNSv6 = @(
-    "2a07:e340::2",      # Mullvad IPv6
+    "2620:fe::9",      # Quad9 IPv6
     "2606:4700:4700::1001" # Cloudflare IPv6
 )
 
